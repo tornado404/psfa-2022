@@ -38,8 +38,7 @@ RUN python -m pip install --no-cache-dir --no-build-isolation /tmp/torch-2.0.1+c
  && rm -f /tmp/torch-2.0.1+cu118-cp39-cp39-linux_x86_64.whl
 #RUN python -m pip install torch==2.0.1+cu118 --index-url https://download.pytorch.org/whl/cu118 --extra-index-url https://pypi.tuna.tsinghua.edu.cn/simple
 
-RUN echo "force rebuild $(date)" && \
-    python -c "import torch; print(torch.cuda.is_available())"
+#RUN echo "force rebuild $(date)" && python -c "import torch; print(torch.cuda.is_available())"
 
 # 编译 nvdiffrast
 # 使用本地已下载的 nvdiffrast 源码包进行安装
@@ -91,6 +90,9 @@ RUN curl -fL https://mirrors.aliyun.com/pypi/get-pip.py -o /tmp/get-pip.py \
 RUN ln -sf /usr/bin/python3.9 /usr/local/bin/python \ 
 && ln -sf /usr/bin/python3.9 /usr/local/bin/python3
 
+WORKDIR /workspace 
+COPY requirements.txt /workspace/requirements.txt
+
 RUN python -m pip -V
 RUN python -m pip install --no-cache-dir -U "pip<24.1" setuptools wheel 
 RUN python -m pip install --no-cache-dir numpy==1.23.5
@@ -100,10 +102,35 @@ RUN python -m pip install /tmp/torch-2.0.1+cu118-cp39-cp39-linux_x86_64.whl \
  && rm -f /tmp/torch-2.0.1+cu118-cp39-cp39-linux_x86_64.whl
 #RUN python -m pip install torch==2.0.1+cu118 --index-url https://download.pytorch.org/whl/cu118 --extra-index-url https://pypi.tuna.tsinghua.edu.cn/simple
 
+RUN python -m pip install --no-cache-dir Cython ninja pybind11 \ 
+            && python -m pip install --no-cache-dir -r /workspace/requirements.txt 
+
+RUN python -m pip install --no-cache-dir \ 
+    tensorflow==2.13.0 \ 
+    jax==0.4.23 \ 
+    jaxlib==0.4.23            
+
+RUN python -m pip install --no-cache-dir \ 
+    pyg_lib \ 
+    torch_scatter \ 
+    torch_sparse \ 
+    torch_cluster \ 
+    torch_spline_conv \ 
+    -f https://data.pyg.org/whl/torch-2.0.1+cu118.html \ 
+    && python -m pip install --no-cache-dir torch_geometric 
+
+ENV TORCH_CUDA_ARCH_LIST="7.5;8.0;8.6;8.9"
+
 # 🔥 关键：只拷贝已编译好的 nvdiffrast
 COPY --from=builder /usr/local/lib/python3.9/dist-packages/nvdiffrast \
                      /usr/local/lib/python3.9/dist-packages/nvdiffrast
 COPY --from=builder /usr/local/lib/python3.9/dist-packages/nvdiffrast*.dist-info \
                      /usr/local/lib/python3.9/dist-packages/
 
+RUN python -m pip install --no-cache-dir videoio==0.3.0
+COPY . /workspace 
+
+RUN rm -rf /workspace/assets /workspace/runs \ 
+  && mkdir -p /workspace/assets /workspace/runs 
+ENV PYTHONPATH=/workspace
 CMD ["bash"]
