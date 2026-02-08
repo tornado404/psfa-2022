@@ -8,5 +8,7 @@ elif _backend == "VULKAN":
     from .backend_vulkan import *
 elif _backend == "WGPU":
     from .backend_wgpu import *
+elif _backend == "SKIP":
+    from .backend_skip import *
 else:
     raise NotImplementedError(f"Invalid value for 'MIKU_RENDER_BACKEND': {_backend}")

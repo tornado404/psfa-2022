@@ -47,6 +47,8 @@ ENV TORCH_CUDA_ARCH_LIST="6.1;7.0;7.5;8.0;8.6"
 RUN python -m pip install --no-cache-dir --no-build-isolation /tmp/nvdiffrast.tar.gz \
  && rm -f /tmp/nvdiffrast.tar.gz
 
+RUN python3.9 -c "import site,sys; print('python:',sys.executable); print('site-packages:',site.getsitepackages())"
+
 # =========================
 # Stage 2: runtime
 # =========================
@@ -106,9 +108,15 @@ RUN python -m pip install --no-cache-dir Cython ninja pybind11 \
             && python -m pip install --no-cache-dir -r /workspace/requirements.txt 
 
 RUN python -m pip install --no-cache-dir \ 
+    --disable-pip-version-check \
+    --no-input \
     tensorflow==2.13.0 \ 
     jax==0.4.23 \ 
-    jaxlib==0.4.23            
+    jaxlib==0.4.23   \          
+  torchvision==0.15.2+cu118 \
+  torchaudio==2.0.2+cu118 \
+  --index-url https://download.pytorch.org/whl/cu118 \
+  --extra-index-url https://pypi.tuna.tsinghua.edu.cn/simple
 
 RUN python -m pip install --no-cache-dir \ 
     pyg_lib \ 
@@ -122,11 +130,13 @@ RUN python -m pip install --no-cache-dir \
 ENV TORCH_CUDA_ARCH_LIST="7.5;8.0;8.6;8.9"
 
 # 🔥 关键：只拷贝已编译好的 nvdiffrast
-COPY --from=builder /usr/local/lib/python3.9/dist-packages/nvdiffrast \
-                     /usr/local/lib/python3.9/dist-packages/nvdiffrast
-COPY --from=builder /usr/local/lib/python3.9/dist-packages/nvdiffrast*.dist-info \
-                     /usr/local/lib/python3.9/dist-packages/
-
+# COPY --from=builder /usr/local/lib/python3.9/dist-packages/nvdiffrast \
+#                      /usr/local/lib/python3.9/dist-packages/nvdiffrast
+# COPY --from=builder /usr/local/lib/python3.9/dist-packages/nvdiffrast*.dist-info \
+#                      /usr/local/lib/python3.9/dist-packages/
+COPY --from=builder \
+  /usr/local/lib/python3.9/dist-packages \
+  /usr/local/lib/python3.9/dist-packages
 RUN python -m pip install --no-cache-dir videoio==0.3.0
 COPY . /workspace 
 

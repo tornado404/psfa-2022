@@ -45,7 +45,7 @@ All data-processing and training codes are contained, but not cleaned yet.
 ## build
 ```bash
 docker build -t psfa:latest .
-docker build --no-cache -t  psfa:latest .
+docker build --no-cache --progress=plain -t  psfa:latest .
 docker build --progress=plain -t  psfa:latest .
 ```
 ## run
@@ -61,3 +61,5 @@ docker run -it --rm --gpus all \
 2. generate animation
 ```bash
 docker run -it --rm --name psfa-gen --gpus all -v "$(pwd)/assets:/workspace/assets" -v "$(pwd)/runs:/workspace/runs" psfa:latest bash 
+
+```

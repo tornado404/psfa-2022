@@ -1,5 +1,8 @@
 source scripts/functions.sh
 
+# Disable wgpu in docker
+export MIKU_RENDER_BACKEND=SKIP
+
 # Speaker & exp.
 speaker=m001_trump
 exp=decmp
