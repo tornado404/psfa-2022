@@ -143,6 +143,7 @@ class ResultsWriter(object):
         self.reset()
 
         # * Create writers
+        print("draw_fn_list: ", json.dumps([x.__name__ for x in draw_fn_list]))
         self.create_writers(draw_fn_list)
 
     def reset(self):
@@ -182,7 +183,13 @@ class ResultsWriter(object):
             # create writer if not exists
             self.draw_fn_list.append(draw_fn)
             self.draw_fn_names.append(name)
-            self.writers.append(VideoWriter(vpath, **kwargs))
+            try:
+                self.writers.append(VideoWriter(f"{out_prefix}({name}).mp4", fps=30, audio_source=self.src_apath, quality="high"))
+            except TypeError as e:
+                log.error(f"Failed to create writer for {name}: {e}")
+                import traceback
+                traceback.print_exc()
+                pass
             all_exists = False
         if all_exists:
             log.warning(f"{os.path.basename(self.out_prefix)} exists.")
@@ -388,6 +395,7 @@ class ResultsWriter(object):
         # * save metrics
         if self.dump_metrics and len(self.metrics) > 0:
             metrics_path = self.out_prefix + "_metrics.json"
+            os.makedirs(os.path.dirname(metrics_path), exist_ok=True)
             with open(metrics_path, "w") as fp:
                 json.dump(self.metrics, fp)
 

@@ -1,7 +1,7 @@
 source scripts/functions.sh
 
-# Disable wgpu in docker
-export MIKU_RENDER_BACKEND=SKIP
+# Disable wgpu in docker WGPU FILAMENT VULKAN SKIP
+export MIKU_RENDER_BACKEND=WGPU
 
 # Speaker & exp.
 speaker=m001_trump
@@ -32,16 +32,16 @@ for audio_name in \
   speech@clip4
 do
   python -m scripts.neural_render \
-    --nr_ckpt="runs/neural_renderer/$speaker/checkpoints/epoch_60.pth" \
-    --out_path="runs/anime/$speaker/$exp_name/generated/[50][test]test-clips/${audio_name}-nr.mp4" \
-    --audio_path="runs/anime/$speaker/$exp_name/generated/[50][test]test-clips/${audio_name}/audio.wav" \
-    --offsets_npy="runs/anime/$speaker/$exp_name/generated/[50][test]test-clips/${audio_name}/dump-offsets-final.npy" \
-    --iden_path="assets/datasets/talk_video/celebtalk/data/$speaker/fitted/identity/identity.obj" \
-    --reenact_video="assets/datasets/talk_video/celebtalk/data/$speaker/avoffset_corrected/vld-000-fps25.mp4" \
-    --reenact_coeff="assets/datasets/talk_video/celebtalk/data/$speaker/fitted/vld-000" \
+    --nr_ckpt="/mnt/d/Downloads/psfa-2022-main/runs/neural_renderer/$speaker/checkpoints/epoch_60.pth" \
+    --out_path="/mnt/d/Downloads/psfa-2022-main/runs/anime/$speaker/$exp_name/generated/[50][test]test-clips/${audio_name}-nr.mp4" \
+    --audio_path="/mnt/d/Downloads/psfa-2022-main/runs/anime/$speaker/$exp_name/generated/[50][test]test-clips/${audio_name}/audio.wav" \
+    --offsets_npy="/mnt/d/Downloads/psfa-2022-main/runs/anime/$speaker/$exp_name/generated/[50][test]test-clips/${audio_name}/dump-offsets-final.npy" \
+    --iden_path="/mnt/d/Downloads/psfa-2022-main/assets/datasets/talk_video/celebtalk/data/$speaker/fitted/identity/identity.obj" \
+    --reenact_video="/mnt/d/Downloads/psfa-2022-main/assets/datasets/talk_video/celebtalk/data/$speaker/avoffset_corrected/vld-000-fps25.mp4" \
+    --reenact_coeff="/mnt/d/Downloads/psfa-2022-main/assets/datasets/talk_video/celebtalk/data/$speaker/fitted/vld-000" \
     --reenact_static_frame=0 \
   ;
 done
 
 echo "\n"
-echo "Done! Videos are generated at: runs/anime/$speaker/$exp_name/generated/[50][test]test-clips/"
+echo "Done! Videos are generated at: /mnt/d/Downloads/psfa-2022-main/runs/anime/$speaker/$exp_name/generated/[50][test]test-clips/"

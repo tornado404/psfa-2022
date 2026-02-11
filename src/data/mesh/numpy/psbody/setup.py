@@ -30,10 +30,7 @@ namespace_package = "psbody"
 CGAL_archive = convert_path("./thirdparty/CGAL-4.7.tar.gz")
 if not os.path.exists(CGAL_archive):
     os.makedirs(os.path.dirname(CGAL_archive), exist_ok=True)
-    download_url = "https://github.com/CGAL/cgal/releases/download/releases%2FCGAL-4.7/CGAL-4.7.tar.gz"
-    pwd = os.path.abspath(os.getcwd())
-    cmd = f"cd '{os.path.abspath(os.path.dirname(CGAL_archive))}' && curl -LO '{download_url}' && cd '{pwd}'"
-    os.system(cmd)
+ 
 assert os.path.exists(CGAL_archive), "Failed to find {}".format(CGAL_archive)
 
 

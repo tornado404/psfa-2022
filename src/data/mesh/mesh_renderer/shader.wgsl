@@ -40,7 +40,7 @@ struct VertexOutput {
     @builtin(position) clip_position: vec4<f32>,
 };
 
-let PI: f32 = 3.1415926;
+const PI: f32 = 3.1415926;
 
 // Visible in vs and fs.
 @group(0) @binding(0)

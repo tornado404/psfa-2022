@@ -63,3 +63,18 @@ docker run -it --rm --gpus all \
 docker run -it --rm --name psfa-gen --gpus all -v "$(pwd)/assets:/workspace/assets" -v "$(pwd)/runs:/workspace/runs" psfa:latest bash 
 
 ```
+
+### Windows python call
+1. 阶段1-生成动画网络
+```
+python D:\code\kejibu\backend\script\call_face_anmitation.py --script-path /mnt/d/Downloads/psfa-2022-main/scripts/generate_animnet.sh --speaker-id "m001_trump" --audio-path "D:\Downloads\psfa-2022-main\input.wav" --task-id "my-unique-task-001"
+```
+
+2. 阶段2-渲染动画
+```
+python D:\code\kejibu\backend\script\call_face_anmitation.py \
+  --script-path /mnt/d/Downloads/psfa-2022-main/scripts/generate_rendering.sh \
+  --speaker-id "m001_trump" \
+  --audio-path "D:\Downloads\psfa-2022-main\input.wav" \
+  --task-id "my-unique-task-001"
+```

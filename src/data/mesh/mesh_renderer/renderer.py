@@ -1,7 +1,7 @@
 import os
 import time
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Union, Optional
 
 import cv2
 import numpy as np
@@ -71,7 +71,7 @@ def create_depth_texture(device: wgpu.GPUDevice, w: int, h: int):
     return Texture(texture, view, format)
 
 
-def get_attributes(*which_list: str | tuple[str, int]):
+def get_attributes(*which_list: Union[str, tuple[str, int]]):
     descs = []
     offset = 0
     for which in which_list:
@@ -133,12 +133,12 @@ class MeshRenderer:
 
     def update_transform(
         self,
-        mat_model: npt.NDArray[np.float_] | None = None,
-        mat_view: npt.NDArray[np.float_] | None = None,
-        mat_proj: npt.NDArray[np.float_] | None = None,
+        mat_model: Optional[npt.NDArray[np.float_]] = None,
+        mat_view: Optional[npt.NDArray[np.float_]] = None,
+        mat_proj: Optional[npt.NDArray[np.float_]] = None,
         is_opengl: bool = True,
     ):
-        def _set_mat(key: str, mat: npt.NDArray[np.float_] | None):
+        def _set_mat(key: str, mat: Optional[npt.NDArray[np.float_]]):
             if mat is not None:
                 assert mat.shape == (4, 4)
                 # NOTE: WGPU want column first data.
@@ -156,7 +156,7 @@ class MeshRenderer:
             v = self._transform_data["mat_view"].T
             _set_mat("mat_norm", np.linalg.inv(m @ v).T)
 
-    def update_vertices(self, data: npt.NDArray[np.float_], part: str | None = None):
+    def update_vertices(self, data: npt.NDArray[np.float_], part: Optional[str] = None):
         assert len(data) == self.num_verts, f"Invalid {len(data)} data, should be {self.num_verts}"
         if part is None:
             target_size = vertex_stride // 4
@@ -185,7 +185,7 @@ class MeshRenderer:
         self._index_updated = True
         self._index_data = indices.flatten()
 
-    def toggle(self, which: str, flag: bool | None = None):
+    def toggle(self, which: str, flag: Optional[bool] = None):
         key = which
         if flag is not None:
             new_flag = flag
@@ -209,7 +209,7 @@ class MeshRenderer:
         self,
         num_verts: int,
         num_triangles: int,
-        shader_source: str | None = None,
+        shader_source: Optional[str] = None,
         texture_size: int = 256,
     ):
         self.num_verts = num_verts

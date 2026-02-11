@@ -53,10 +53,10 @@ def set_image_size(w: int, h: int):
 
 def render(
     position: Tensor,
-    mat_model: Tensor | None = None,
-    mat_view: Tensor | None = None,
-    mat_proj: Tensor | None = None,
-    vert_rgb: Tensor | None = None,
+    mat_model: Optional[Tensor] = None,
+    mat_view: Optional[Tensor] = None,
+    mat_proj: Optional[Tensor] = None,
+    vert_rgb: Optional[Tensor] = None,
     lighting: bool = True,
 ) -> onpt.NDArray[onp.uint8]:
     # Check initialized.

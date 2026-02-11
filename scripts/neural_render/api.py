@@ -35,7 +35,13 @@ def lossless_video(img_fmt, out_vpath, apath=None):
     if apath is not None:
         cmd += f" -i '{apath}'"
     # crf = 0 is lossless for 8-bit video
-    cmd += f" -vf fps=25 -c:v libx264rgb -crf 0 -pix_fmt rgb24 -shortest '{out_vpath}'"
+    # cmd += f" -vf fps=25 -c:v libx264rgb -crf 0 -pix_fmt rgb24 -shortest '{out_vpath}'"
+    cmd += (
+        " -vf fps=25,format=yuv420p"
+        " -c:v libx264 -crf 0 -pix_fmt yuv420p"
+        " -colorspace bt709 -color_primaries bt709 -color_trc bt709"
+        f" -shortest '{out_vpath}'"
+    )
     assert os.system(cmd) == 0
 
 

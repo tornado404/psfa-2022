@@ -127,6 +127,17 @@ RUN python -m pip install --no-cache-dir \
     -f https://data.pyg.org/whl/torch-2.0.1+cu118.html \ 
     && python -m pip install --no-cache-dir torch_geometric 
 
+RUN apt-get update && \
+apt-get install -y --no-install-recommends \
+    software-properties-common && \
+add-apt-repository -y universe && \
+apt-get update && \
+apt-get install -y --no-install-recommends \
+    libgmp-dev \
+    libmpfr-dev && \
+rm -rf /var/lib/apt/lists/*
+
+
 ENV TORCH_CUDA_ARCH_LIST="7.5;8.0;8.6;8.9"
 
 # 🔥 关键：只拷贝已编译好的 nvdiffrast

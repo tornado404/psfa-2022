@@ -39,7 +39,7 @@ def load_offsets_swap(config, swap_src_path, swap_info, frm_range: Range, all_fr
         config,
         swp_range,
         a=0,
-        data_fps=swap_info["data_fps"],  # NOTE: the given data_fps
+        data_fps=swap_info["fps"],  # NOTE: the given data_fps
         max_frames=n_swp_frames,  # the maximum number of frames of source (under data_fps)
         data_dir=os.path.dirname(swap_src_path),
         sub_path=os.path.basename(swap_src_path),

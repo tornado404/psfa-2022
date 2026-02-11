@@ -4,20 +4,20 @@ set -o nounset
 set -o pipefail
 
 # * ---------------------------------------------------------------------------------------------------------------- * #
-# * Args
+# * Args (参数处理)
 # * ---------------------------------------------------------------------------------------------------------------- * #
 
 function GetArgs() {
   local exp=
   local exp_name=
   local extra_name=
-  # shared
+  # shared (通用参数)
   local data_src=celebtalk
   local speaker=
   local wanna_fps=30
-  local avoffset_ms=0  # control output avoffset, if not 0, should match speaker's data
+  local avoffset_ms=0  # control output avoffset, if not 0, should match speaker's data (控制输出音视频偏移，如果不为0，应匹配说话者的数据)
   local correct_avoffset=true
-  # for generating
+  # for generating (生成相关参数)
   local is_gen=false
   local test_media=
   local vis_data_src=
@@ -27,42 +27,42 @@ function GetArgs() {
   local dump_metrics=false
   local dump_audio=false
   local video_postfix=''
-  # other
+  # other (其他参数)
   local other=
   for i in "$@"; do
     case $i in
-      --exp=*          ) exp=${i#*=}            ;;
-      --exp_name=*     ) exp_name=${i#*=}       ;;
-      --extra_name=*   ) extra_name=${i#*=}     ;;
+      --exp=*          ) exp=${i#*=}            ;; # 实验类型
+      --exp_name=*     ) exp_name=${i#*=}       ;; # 实验名称
+      --extra_name=*   ) extra_name=${i#*=}     ;; # 额外名称后缀
       # shared
-      --data_src=*     ) data_src=${i#*=}       ;;
-      --speaker=*      ) speaker=${i#*=}        ;;
-      --wanna_fps=*    ) wanna_fps=${i#*=}      ;;
-      --avoffset_ms=*  ) avoffset_ms=${i#*=}    ;;
-      --keep_avoffset  ) correct_avoffset=false ;;
+      --data_src=*     ) data_src=${i#*=}       ;; # 数据源
+      --speaker=*      ) speaker=${i#*=}        ;; # 说话人
+      --wanna_fps=*    ) wanna_fps=${i#*=}      ;; # 期望帧率
+      --avoffset_ms=*  ) avoffset_ms=${i#*=}    ;; # 音视频偏移毫秒数
+      --keep_avoffset  ) correct_avoffset=false ;; # 保持原有偏移，不修正
       # generating
-      --generating     ) is_gen=true            ;;
-      --test_media=*   ) test_media=${i#*=}     ;;
-      --vis_data_src=* ) vis_data_src=${i#*=}   ;;
-      --vis_speaker=*  ) vis_speaker=${i#*=}    ;;
-      --same_idle      ) same_idle=true         ;;
-      --dump_offsets   ) dump_offsets=true      ;;
-      --dump_metrics   ) dump_metrics=true      ;;
-      --dump_audio     ) dump_audio=true        ;;
-      --video_postfix=*) video_postfix=${i#*=}  ;;
+      --generating     ) is_gen=true            ;; # 生成模式
+      --test_media=*   ) test_media=${i#*=}     ;; # 测试媒体文件
+      --vis_data_src=* ) vis_data_src=${i#*=}   ;; # 可视化数据源
+      --vis_speaker=*  ) vis_speaker=${i#*=}    ;; # 可视化说话人
+      --same_idle      ) same_idle=true         ;; # 使用相同的闲置状态
+      --dump_offsets   ) dump_offsets=true      ;; # 导出偏移量
+      --dump_metrics   ) dump_metrics=true      ;; # 导出指标
+      --dump_audio     ) dump_audio=true        ;; # 导出音频
+      --video_postfix=*) video_postfix=${i#*=}  ;; # 视频文件名后缀
       # other
       *) other="${other} ${i}";;
     esac
   done
 
-  # > required
+  # > required (必填参数检查)
   [ -n "${exp}"      ] || { echo "[ERROR] --exp is not given!"; exit 1; }
   [ -n "${exp_name}" ] || { echo "[ERROR] --exp_name is not given!"; exit 1; }
   if [[ ! "${exp_name}" =~ .*"${exp}".* ]]; then
     echo "[ERROR] --exp_name '${exp_name}' not match with --exp '${exp}'"; exit 1;
   fi
 
-  # > set default values depends on other
+  # > set default values depends on other (设置默认值)
   [ -n "${test_media}"   ] || { test_media="training_${data_src}"; }
   [ -n "${vis_data_src}" ] || { vis_data_src=${data_src};          }
   [ -n "${vis_speaker}"  ] || { vis_speaker=${speaker};            }
@@ -70,22 +70,22 @@ function GetArgs() {
     video_postfix+='-same_idle'
   fi
 
-  # > some values depends on mode
+  # > some values depends on mode (根据模式设置参数)
   local max_duration=20
   if [ "$is_gen" == "true" ]; then
     max_duration=1000000
   fi
 
-  # > speakers from vocaset
+  # > speakers from vocaset (VOCASET 说话人设置)
   local speakers_voca='${data.VOCASET.REAL3D_SPEAKERS}'
   if [[ "$exp" == "track" ]]; then
     speakers_voca='[]'
   fi
 
-  # > get exp_dir
+  # > get exp_dir (实验目录)
   local root='${path.runs_dir}/anime'
 
-  # > args string
+  # > args string (构建参数字符串)
   local shared=" experiment=animnet_${exp} path.exp_dir=${root}/$speaker/${exp_name}${extra_name}"
   # data
   shared+=" data=all_vocaset dataset=talk_voca datamodule=talk_voca"
@@ -128,12 +128,12 @@ function GetArgs() {
   shared+=" ++model.visualizer.dump_audio=${dump_audio}"
   shared+=' ++model.visualizer.dkwargs.style_id="${index_of:${dataset.speakers},${model.visualizer.speaker}}"'
 
-  # > Extra args for decmp
+  # > Extra args for decmp (decmp 实验的额外参数)
   if [ "$exp" == "decmp" ]; then
     shared="${shared} $(GetArgsForDecmp)"
   fi
 
-  # > Concate with other unknown args
+  # > Concate with other unknown args (连接其他未知参数)
   echo "${shared} ${other}"
 }
 
@@ -151,14 +151,14 @@ function GetArgsForDecmp() {
 }
 
 # * ---------------------------------------------------------------------------------------------------------------- * #
-# * Train AnimNet
+# * Train AnimNet (训练 AnimNet 模型)
 # * ---------------------------------------------------------------------------------------------------------------- * #
 
-# * Baselines (Ablation of structure)
+# * Baselines (Ablation of structure) (基线模型 - 结构消融)
 function TrainAnimNet() {
-  # * Baseline1: Only Tracked data
+  # * Baseline1: Only Tracked data (基线1：仅使用跟踪数据)
   python3 -m src mode=train $(GetArgs --exp=track --exp_name=animnet-track "$@");
-  # * Baseline2: VOCASET + Tracked data
+  # * Baseline2: VOCASET + Tracked data (基线2：VOCASET + 跟踪数据)
   python3 -m src mode=train $(GetArgs --exp=cmb3d --exp_name=animnet-cmb3d "$@");
 }
 
@@ -166,7 +166,7 @@ function TrainAnimNetTrack() {
   python3 -m src mode=train $(GetArgs --exp=track --exp_name=animnet-track "$@");
 }
 
-# * Ablation of structure: naive style encoder from renference animation
+# * Ablation of structure: naive style encoder from renference animation (结构消融：来自参考动画的简单风格编码器)
 function TrainAnimNetRefer() {
   python3 -m src mode=train $(GetArgs --exp=refer --exp_name=animnet-refer "$@") \
     model.data_info.pad_tgt=true \
@@ -192,14 +192,14 @@ function TrainAnimNetDecmpAblDtwSwp() {
 }
 
 # * ---------------------------------------------------------------------------------------------------------------- * #
-# * Train Decmp
+# * Train Decmp (训练解耦模型)
 # * ---------------------------------------------------------------------------------------------------------------- * #
 
 function TrainAnimNetDecmp() {
   python3 -m src mode=train $(GetArgs --exp=decmp --exp_name=animnet-decmp "$@");
 }
 
-# * Loss ablations
+# * Loss ablations (损失函数消融实验)
 function TrainAnimNetDecmpAblation() {
   local ablations=
   local other=
@@ -230,7 +230,7 @@ function TrainAnimNetDecmpAblation() {
 }
 
 # * ---------------------------------------------------------------------------------------------------------------- * #
-# * Generating
+# * Generating (生成)
 # * ---------------------------------------------------------------------------------------------------------------- * #
 
 function GenAnimNet() {
@@ -238,7 +238,7 @@ function GenAnimNet() {
   local other="--generating"
   for i in "$@"; do
     case $i in
-      --load=*) load=${i#*=} ;;
+      --load=*) load=${i#*=} ;; # 加载的检查点路径
       *) other="${other} ${i}";;
     esac
   done
@@ -262,11 +262,11 @@ function GenAll() {
   local shared=
   for i in "$@"; do
     case $i in
-      --load_decmp=*) load_decmp=${i#*=} ;;
-      --load_cmb3d=*) load_cmb3d=${i#*=} ;;
-      --load_refer=*) load_refer=${i#*=} ;;
-      --load_track=*) load_track=${i#*=} ;;
-      --ablation    ) ablation=true       ;;
+      --load_decmp=*) load_decmp=${i#*=} ;; # 加载解耦模型
+      --load_cmb3d=*) load_cmb3d=${i#*=} ;; # 加载组合3D模型
+      --load_refer=*) load_refer=${i#*=} ;; # 加载参考模型
+      --load_track=*) load_track=${i#*=} ;; # 加载跟踪模型
+      --ablation    ) ablation=true       ;; # 是否进行消融实验
       *) shared="${shared} ${i}";;
     esac
   done

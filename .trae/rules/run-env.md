@@ -1,0 +1,1 @@
+当前项目处于wsl2中的conda 环境 psfa中,执行python pip命令前需要激活该环境
